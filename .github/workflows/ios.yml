@@ -3,8 +3,7 @@ name: Build iOS IPA
 on:
   workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: [main]
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -14,37 +13,28 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.10.6"
           cache: true
 
-      - name: Flutter Doctor
-        run: flutter doctor -v
+      - run: flutter clean
+      - run: flutter pub get
 
-      - name: Clean
-        run: flutter clean
+      - name: Build iOS Simulator
+        run: flutter build ios --simulator --release
 
-      - name: Get Packages
-        run: flutter pub get
-
-      - name: Build iOS
-        run: flutter build ios --release --no-codesign
-
-      - name: Create IPA
+      - name: Package App
         run: |
           mkdir -p Payload
-          cp -R build/ios/iphoneos/Runner.app Payload/
+          cp -R build/ios/iphonesimulator/Runner.app Payload/
           cd Payload
-          zip -r ../app.ipa .
+          zip -r ../app.zip .
           cd ..
 
-      - name: Upload IPA
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
-          name: ios-ipa
-          path: app.ipa
+          name: ios-build
+          path: app.zip
