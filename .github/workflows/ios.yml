@@ -10,7 +10,7 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  build-ios:
+  build:
     runs-on: macos-latest
 
     steps:
@@ -20,20 +20,17 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          flutter-version: "3.10.6"
           cache: true
 
       - name: Flutter Doctor
         run: flutter doctor -v
 
-      - name: Install Dependencies
-        run: flutter pub get
+      - name: Clean
+        run: flutter clean
 
-      - name: Install CocoaPods
-        run: |
-          cd ios
-          pod install --repo-update
-          cd ..
+      - name: Get Packages
+        run: flutter pub get
 
       - name: Build iOS
         run: flutter build ios --release --no-codesign
@@ -49,5 +46,5 @@ jobs:
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: app-ipa
+          name: ios-ipa
           path: app.ipa
