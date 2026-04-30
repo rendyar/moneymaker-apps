@@ -1,6 +1,7 @@
-name: iOS Build
+name: Build iOS IPA
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -9,11 +10,11 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  build:
+  build-ios:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Flutter
@@ -22,11 +23,8 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Flutter Version
-        run: flutter --version
-
-      - name: Clean Project
-        run: flutter clean
+      - name: Flutter Doctor
+        run: flutter doctor -v
 
       - name: Install Dependencies
         run: flutter pub get
@@ -51,5 +49,5 @@ jobs:
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: ios-ipa
+          name: app-ipa
           path: app.ipa
