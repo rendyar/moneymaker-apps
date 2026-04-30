@@ -2,29 +2,41 @@ name: iOS Build
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.19.0"
+          channel: stable
+          cache: true
 
-      - run: flutter pub get
+      - name: Flutter Pub Get
+        run: flutter pub get
 
-      - run: flutter build ios --release --no-codesign
+      - name: Build iOS
+        run: flutter build ios --release --no-codesign
 
-      - run: |
-          mkdir Payload
-          cp -r build/ios/iphoneos/Runner.app Payload/
-          zip -r app.ipa Payload
+      - name: Create IPA
+        run: |
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/Runner.app Payload/
+          cd Payload
+          zip -r ../app.ipa .
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
         with:
           name: ipa
           path: app.ipa
